@@ -9,8 +9,8 @@ if (ACTIVE_DB_ENV == "local") {
   DB_DIALECT = "mysql";
 } else {
   DB = "nodejs_fiverr_roommate-app-db";
-  DB_USER = "root";
-  DB_PASS = "root";
+  DB_USER = "roommate";
+  DB_PASS = "roommateroommate";
   DB_HOST = "roommate.cqsbgyke98wi.ap-southeast-1.rds.amazonaws.com";
   DB_DIALECT = "mysql";
 }
