@@ -8,4 +8,8 @@ router.post("/login", authController.login);
 
 router.post("/signup", authController.signup);
 
+router.post("/verify-phone-code", authController.verifyPhone);
+
+router.post("/resend-verify-code", authController.resendVerificationCode);
+
 module.exports = router;

@@ -29,7 +29,7 @@ module.exports = {
 
   // JWT Related Config
   JWT_SECRET: "JWT_SECRET, this should be uniqe and long for security reasons.",
-  JWT_EXPIRE_TIME: "3h",
+  JWT_EXPIRE_TIME: "20 days",
 
   // Request Related Config
   HEADER_AUTH_KEY: "X-Authorization",
@@ -40,6 +40,7 @@ module.exports = {
   // Twilio Details
   TWILIO_SSID: "AC946841aa981127898b9ed08d314e6d43",
   TWILIO_TOKEN: "a53a9e6ab66dc82eca45ccc2d5483f7d",
+  TWILIO_FROM_NUMBER: "+19414512860",
 
   // Default Models Data Config
   // Default Roles

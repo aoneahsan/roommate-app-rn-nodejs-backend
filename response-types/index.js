@@ -59,4 +59,10 @@ module.exports = {
     statusCode: 500,
     errors: [],
   },
+
+  JWT_TOKEN_CREATION_ERROR: {
+    message: "JWT_TOKEN_CREATION_ERROR",
+    statusCode: 500,
+    errors: [],
+  },
 };
