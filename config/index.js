@@ -1,25 +1,34 @@
-const DB = "chat";
-const DB_USER = "ahsan";
-const DB_PASS = "xshuZ8COLgL09x3n";
+let DB, DB_USER, DB_PASS, DB_HOST, DB_DIALECT;
+const ACTIVE_DB_ENV = "local";
+if (ACTIVE_DB_ENV == "local") {
+  DB = "nodejs_fiverr_roommate-app-db";
+  DB_USER = "root";
+  DB_PASS = "root";
+  DB_HOST = "localhost";
+  DB_DIALECT = "mysql";
+} else {
+  DB = "nodejs_fiverr_roommate-app-db";
+  DB_USER = "root";
+  DB_PASS = "root";
+  DB_HOST = "roommate.cqsbgyke98wi.ap-southeast-1.rds.amazonaws.com";
+  DB_DIALECT = "mysql";
+}
 
 module.exports = {
   // Server Related Config
   SERVER_PORT: 3020,
 
-  // MongoDB Related Config
-  MONGODB_URI: `mongodb+srv://${DB_USER}:${DB_PASS}@ivylab.x3o5y.mongodb.net/${DB}?retryWrites=true&w=majority`,
+  // Database Config
   DB_DETAILS: {
     DB: DB,
     DB_USER: DB_USER,
     DB_PASS: DB_PASS,
+    DB_HOST: DB_HOST,
+    DB_DIALECT: DB_DIALECT,
   },
 
-  // GraphQL Realated Config
-  GRAPHQL_URL: "/graphql",
-
   // JWT Related Config
-  JWT_SECRET:
-    "JWT_SECRET, this should be uniqe and long for security reasons.",
+  JWT_SECRET: "JWT_SECRET, this should be uniqe and long for security reasons.",
   JWT_EXPIRE_TIME: "3h",
 
   // Request Related Config
@@ -28,60 +37,45 @@ module.exports = {
   // bcryptjs hash default lenght
   BCRYPTJS_HASH_LENGHT: 12,
 
+  // Twilio Details
+  TWILIO_SSID: "AC946841aa981127898b9ed08d314e6d43",
+  TWILIO_TOKEN: "a53a9e6ab66dc82eca45ccc2d5483f7d",
+
   // Default Models Data Config
   // Default Roles
   DEFAULT_ROLES: {
     admin: {
       title: "admin",
-      description: "admin user",
+      description: "admin user role",
     },
-    tutor: {
-      title: "tutor",
-      description: "tutor user",
-    },
-    student: {
-      title: "student",
-      description: "student user",
+    customer: {
+      title: "customer",
+      description: "customer user role",
     },
   },
 
   // Default Users
   DEFAULT_USERS: {
     admin: {
-      full_name: "admin user",
+      name: "admin user",
       username: "admin",
       email: "admin@demo.com",
-      tag_line: "admin user of chat app",
       password: "123456",
-      status: "active",
-      last_seen: new Date(),
+      online_status: "active",
+      phone: "3046619706",
+      country_code: "+92",
       // role: //this will be set automatically while creating default user
-      contacts: [],
-      groups: [],
     },
-    tutor: {
-      full_name: "tutor user",
-      username: "tutor",
-      email: "tutor@demo.com",
-      tag_line: "tutor user of chat app",
+    customer: {
+      full_name: "customer user",
+      username: "customer",
+      email: "customer@demo.com",
+      tag_line: "customer user of chat app",
       password: "123456",
-      status: "inactive",
-      last_seen: new Date(),
+      online_status: "active",
+      phone: "3084618263",
+      country_code: "+92",
       // role: //this will be set automatically while creating default user
-      contacts: [],
-      groups: [],
-    },
-    student: {
-      full_name: "student user",
-      username: "student",
-      email: "student@demo.com",
-      tag_line: "student user of chat app",
-      password: "123456",
-      status: "away",
-      last_seen: new Date(),
-      // role: //this will be set automatically while creating default user
-      contacts: [],
-      groups: [],
     },
   },
 };

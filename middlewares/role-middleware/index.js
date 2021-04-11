@@ -1,4 +1,5 @@
 // Core Imports
+const Sequelize = require("sequelize");
 
 // Custom Imports
 const Role = require("./../../models/role");
@@ -6,21 +7,21 @@ const CONFIG = require("./../../config");
 
 module.exports = async (req, res, next) => {
   const adminRole = CONFIG.DEFAULT_ROLES.admin;
-  const tutorRole = CONFIG.DEFAULT_ROLES.tutor;
-  const studentRole = CONFIG.DEFAULT_ROLES.student;
+  const customerRole = CONFIG.DEFAULT_ROLES.customer;
 
-  const defaultRoles = await Role.find({
-    title: [adminRole.title, tutorRole.title, studentRole.title],
+  const defaultRoles = await Role.findAll({
+    where: {
+      title: {
+        [Sequelize.Op.in]: [adminRole.title, customerRole.title],
+      },
+    },
   });
   // console.log("role-middleware/index.js === mainfunction == ", {defaultRoles});
   const adminRoleIndex = defaultRoles.findIndex(
     (el) => el.title == adminRole.title
   );
-  const tutorRoleIndex = defaultRoles.findIndex(
-    (el) => el.title == tutorRole.title
-  );
-  const studentRoleIndex = defaultRoles.findIndex(
-    (el) => el.title == studentRole.title
+  const customerRoleIndex = defaultRoles.findIndex(
+    (el) => el.title == customerRole.title
   );
   // creating admin role if does not exists
   if (adminRoleIndex < 0) {
@@ -29,18 +30,11 @@ module.exports = async (req, res, next) => {
       description: adminRole.description,
     });
   }
-  // creating tutor role if does not exists
-  if (tutorRoleIndex < 0) {
+  // creating customer role if does not exists
+  if (customerRoleIndex < 0) {
     await Role.create({
-      title: tutorRole.title,
-      description: tutorRole.description,
-    });
-  }
-  // creating student role if does not exists
-  if (studentRoleIndex < 0) {
-    await Role.create({
-      title: studentRole.title,
-      description: studentRole.description,
+      title: customerRole.title,
+      description: customerRole.description,
     });
   }
 

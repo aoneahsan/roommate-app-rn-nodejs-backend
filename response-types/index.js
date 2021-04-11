@@ -11,12 +11,6 @@ module.exports = {
     statusCode: 422,
   },
 
-  // graphql default error response
-  GRAPHQL_DEFAULT_ERROR_RESPONSE: {
-    message: "GRAPHQL_DEFAULT_ERROR_RESPONSE",
-    statusCode: 500,
-  },
-
   // action success response
   SUCCESS: {
     message: "SUCCESS",
@@ -51,6 +45,18 @@ module.exports = {
   USER_EXISTS: {
     message: "USER_EXISTS",
     statusCode: 400,
+    errors: [],
+  },
+
+  NOT_FOUND: {
+    message: "NOT_FOUND",
+    statusCode: 404,
+    errors: [],
+  },
+
+  INTERNAL_SERVER_ERROR: {
+    message: "INTERNAL_SERVER_ERROR",
+    statusCode: 500,
     errors: [],
   },
 };

@@ -2,21 +2,13 @@ const Sequelize = require("sequelize");
 
 const sequelize = require("./../../database");
 
-const Role = sequelize.define("role", {
+const MODAL_NAME = sequelize.define("MODAL_NAME", {
   id: {
     type: Sequelize.INTEGER,
     autoIncrement: true,
     allowNull: false,
     primaryKey: true,
   },
-  title: {
-    type: Sequelize.STRING,
-    allowNull: true,
-  },
-  description: {
-    type: Sequelize.STRING,
-    allowNull: true,
-  },
 });
 
-module.exports = Role;
+module.exports = MODAL_NAME;
