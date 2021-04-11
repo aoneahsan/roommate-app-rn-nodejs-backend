@@ -1,0 +1,30 @@
+************************************************************************
+{
+  hello
+}
+
+************************************************************************
+mutation loginMutation($email: String = "admin@demo.com", $password:String = "123456") {
+  login(userInput: {email: $email, password: $password}) {
+    _id
+  }
+}
+
+mutation loginMutation($email: String = "admin@demo.com", $password:String = "123456") {
+  login(userInput: {email: $email, password: $password}) {
+    _id
+    token
+    username
+    email
+    password
+    tag_line
+    last_seen
+    role {
+      _id
+      title
+      description
+      createdAt
+      updatedAt
+    }
+  }
+}
