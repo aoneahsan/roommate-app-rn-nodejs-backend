@@ -1,4 +1,4 @@
-let DB, DB_USER, DB_PASS, DB_HOST, DB_DIALECT;
+let DB, DB_USER, DB_PASS, DB_HOST, DB_DIALECT, DB_PORT;
 // const ACTIVE_DB_ENV = "local";
 const ACTIVE_DB_ENV = "production";
 if (ACTIVE_DB_ENV == "local") {
@@ -7,17 +7,19 @@ if (ACTIVE_DB_ENV == "local") {
   DB_PASS = "root";
   DB_HOST = "localhost";
   DB_DIALECT = "mysql";
+  DB_PORT = 3306;
 } else {
   DB = "nodejs_fiverr_roommate-app-db";
   DB_USER = "roommate";
   DB_PASS = "roommateroommate";
   DB_HOST = "roommate.cqsbgyke98wi.ap-southeast-1.rds.amazonaws.com";
   DB_DIALECT = "mysql";
+  DB_PORT = 3306;
 }
 
 module.exports = {
   // Server Related Config
-  SERVER_PORT: 3020,
+  SERVER_PORT: 80,
 
   // Database Config
   DB_DETAILS: {
@@ -25,6 +27,7 @@ module.exports = {
     DB_USER: DB_USER,
     DB_PASS: DB_PASS,
     DB_HOST: DB_HOST,
+    DB_PORT: DB_PORT,
     DB_DIALECT: DB_DIALECT,
   },
 
