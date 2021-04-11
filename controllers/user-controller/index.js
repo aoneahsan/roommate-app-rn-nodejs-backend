@@ -9,7 +9,6 @@ const RESPONSE_TYPES = require("./../../response-types");
 
 module.exports.getProfileData = async (req, res, next) => {
   try {
-    const { phone } = req.body;
     if (!req.isAuth) {
       return res.status(RESPONSE_TYPES.UNAUTHENTICATED.statusCode).json({
         message: RESPONSE_TYPES.UNAUTHENTICATED.message,
@@ -17,7 +16,8 @@ module.exports.getProfileData = async (req, res, next) => {
         status_code: RESPONSE_TYPES.UNAUTHENTICATED.statusCode,
       });
     } else {
-      const users = await User.findAll({ where: { phone: phone } });
+      const { userPhone } = req;
+      const users = await User.findAll({ where: { phone: userPhone } });
       const user = users[0];
       if (!user) {
         return res.status(RESPONSE_TYPES.NOT_FOUND.statusCode).json({
@@ -26,7 +26,11 @@ module.exports.getProfileData = async (req, res, next) => {
           status_code: RESPONSE_TYPES.NOT_FOUND.statusCode,
         });
       } else {
-        return res.status(200).json(user);
+        return res.status(RESPONSE_TYPES.SUCCESS.statusCode).json({
+          data: user,
+          success: true,
+          status_code: RESPONSE_TYPES.SUCCESS.statusCode,
+        });
       }
     }
   } catch (error) {

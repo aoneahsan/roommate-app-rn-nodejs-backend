@@ -11,14 +11,14 @@ if (ACTIVE_DB_ENV == "local") {
 
   SERVER_PORT = 3020;
 } else {
-  DB = "nodejs_fiverr_roommate-app-db";
+  DB = "roommate";
   DB_USER = "roommate";
   DB_PASS = "roommateroommate";
   DB_HOST = "roommate.cqsbgyke98wi.ap-southeast-1.rds.amazonaws.com";
   DB_DIALECT = "mysql";
   DB_PORT = 3306;
 
-  SERVER_PORT = 80;
+  SERVER_PORT = 3020;
 }
 
 module.exports = {
