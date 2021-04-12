@@ -1,14 +1,22 @@
 // Core Imports
-// const bcrypt = require("bcryptjs");
-const validator = require("validator");
 const JWT = require("jsonwebtoken");
 const colors = require("colors");
 
 // Custom Imports
-const User = require("./../../models/user");
+const {
+  TRY_CATCH_ERROR_RESPONSE,
+  SUCCESS_RESPONSE,
+  NOT_FOUND_RESPONSE,
+  INVALID_INPUT_RESPONSE,
+  USER_EXISTS_RESPONSE,
+  UNAUTHENTICATED_RESPONSE,
+  JWT_TOKEN_CREATION_ERROR_RESPONSE,
+} = require("./../../utils");
 const CONFIG = require("./../../config");
 const RESPONSE_TYPES = require("./../../response-types");
 const twilioClient = require("./../../twilio-client");
+// Models
+const User = require("./../../models/user");
 const Role = require("../../models/role");
 
 // *********************************************************************
@@ -24,19 +32,12 @@ module.exports.signup = async (req, res, next) => {
       errors.push({ key: "countryCode", message: "country code is required!" });
     }
     if (errors.length > 0) {
-      return res.status(RESPONSE_TYPES.INVALID_INPUT.statusCode).json({
-        message: RESPONSE_TYPES.INVALID_INPUT.message,
-        success: false,
-        status_code: RESPONSE_TYPES.INVALID_INPUT.statusCode,
-        errors: errors,
-      });
+      return INVALID_INPUT_RESPONSE(res, errors);
     }
     const users = await User.findAll({ where: { phone: phone } });
     const userExists = users[0];
     if (userExists) {
-      return res
-        .status(RESPONSE_TYPES.INVALID_INPUT.statusCode)
-        .json({ message: "User Already Exists!" });
+      return USER_EXISTS_RESPONSE(res);
     }
     const availableRoles = await Role.findAll({
       where: {
@@ -45,11 +46,7 @@ module.exports.signup = async (req, res, next) => {
     });
     const customerRole = availableRoles[0];
     if (!customerRole) {
-      return res.status(RESPONSE_TYPES.NOT_FOUND.statusCode).json({
-        message: RESPONSE_TYPES.NOT_FOUND.message,
-        suucess: false,
-        detail: "customer role not found, auth-controller === ",
-      });
+      return NOT_FOUND_RESPONSE(res);
     }
     const user = await User.create({
       phone: phone,
@@ -57,19 +54,10 @@ module.exports.signup = async (req, res, next) => {
     });
     user.addRole(customerRole);
     const result = await storeUserVerifyCode(user);
-    console.log("AuthController === signup == user = ", { user, result });
-    return res.status(RESPONSE_TYPES.SUCCESS.statusCode).json({
-      data: user,
-      success: true,
-      status_code: RESPONSE_TYPES.SUCCESS.statusCode,
-    });
+    const userData = user.dataValues;
+    return SUCCESS_RESPONSE(res, userData);
   } catch (error) {
-    return res.status(RESPONSE_TYPES.INTERNAL_SERVER_ERROR.statusCode).json({
-      message: RESPONSE_TYPES.INTERNAL_SERVER_ERROR.message,
-      status_code: RESPONSE_TYPES.INTERNAL_SERVER_ERROR.statusCode,
-      detail: "auth-controller === signup == trycatch",
-      error,
-    });
+    return TRY_CATCH_ERROR_RESPONSE(res, error);
   }
 };
 
@@ -79,31 +67,21 @@ module.exports.login = async (req, res, next) => {
     const users = await User.findAll({ where: { phone: phone } });
     const user = users[0];
     if (!user) {
-      return res.status(RESPONSE_TYPES.NOT_FOUND.statusCode).json({
-        message: RESPONSE_TYPES.NOT_FOUND.message,
-        success: false,
-        status_code: RESPONSE_TYPES.NOT_FOUND.statusCode,
-      });
+      return NOT_FOUND_RESPONSE(res);
     }
     const result = await storeUserVerifyCode(user);
-    return res.status(RESPONSE_TYPES.SUCCESS.statusCode).json({
-      data: user,
-      success: true,
-      status_code: RESPONSE_TYPES.SUCCESS.statusCode,
-    });
+    const userData = user.dataValues;
+    return SUCCESS_RESPONSE(res, userData);
   } catch (error) {
-    return res.status(RESPONSE_TYPES.INTERNAL_SERVER_ERROR.statusCode).json({
-      message: RESPONSE_TYPES.INTERNAL_SERVER_ERROR.message,
-      status_code: RESPONSE_TYPES.INTERNAL_SERVER_ERROR.statusCode,
-      detail: "auth-controller === login == trycatch",
-      error,
-    });
+    console.log("auth-controller === login == trycatch", { error });
+    return TRY_CATCH_ERROR_RESPONSE(res, error);
   }
 };
 
 module.exports.verifyPhone = async (req, res, next) => {
   try {
     const { phone, verifyCode } = req.body;
+    console.log({ phone, verifyCode });
     let errors = [];
     if (!phone) {
       errors.push({ key: "phone", message: "phone number is required!" });
@@ -115,56 +93,31 @@ module.exports.verifyPhone = async (req, res, next) => {
       });
     }
     if (errors.length > 0) {
-      return res.status(RESPONSE_TYPES.INVALID_INPUT.statusCode).json({
-        message: RESPONSE_TYPES.INVALID_INPUT.message,
-        success: false,
-        status_code: RESPONSE_TYPES.INVALID_INPUT.statusCode,
-        errors: errors,
-      });
+      return INVALID_INPUT_RESPONSE(res, errors);
     }
     const users = await User.findAll({ where: { phone: phone } });
     const user = users[0];
     if (!user) {
-      return res.status(RESPONSE_TYPES.NOT_FOUND.statusCode).json({
-        message: RESPONSE_TYPES.NOT_FOUND.message,
-        success: false,
-        status_code: RESPONSE_TYPES.NOT_FOUND.statusCode,
-      });
+      return NOT_FOUND_RESPONSE(res);
     }
     if (user.phone_verify_code != verifyCode) {
-      return res.status(RESPONSE_TYPES.INVALID_INPUT.statusCode).json({
-        message: RESPONSE_TYPES.INVALID_INPUT.message,
-        success: false,
-        status_code: RESPONSE_TYPES.INVALID_INPUT.statusCode,
-        errors: [{ key: "verify_code", message: "Invalid verification code" }],
-      });
+      const errors = [
+        { key: "verify_code", message: "Invalid verification code" },
+      ];
+      return INVALID_INPUT_RESPONSE(res, errors);
     }
     const token = await createAuthTokenAndClearVerifyCode(user);
     if (!token) {
-      return res
-        .status(RESPONSE_TYPES.JWT_TOKEN_CREATION_ERROR.statusCode)
-        .json({
-          message: RESPONSE_TYPES.JWT_TOKEN_CREATION_ERROR.message,
-          status_code: RESPONSE_TYPES.JWT_TOKEN_CREATION_ERROR.statusCode,
-          detail: "auth-controller === verifyPhone == if (!token) return",
-          error,
-        });
+      return JWT_TOKEN_CREATION_ERROR_RESPONSE(res, error);
     }
-    return res.status(RESPONSE_TYPES.SUCCESS.statusCode).json({
-      data: {
-        ...user,
-        token: token,
-      },
-      success: true,
-      status_code: RESPONSE_TYPES.SUCCESS.statusCode,
-    });
+    const userData = user.dataValues;
+    const resData = {
+      ...userData,
+      token: token,
+    };
+    return SUCCESS_RESPONSE(res, resData);
   } catch (error) {
-    return res.status(RESPONSE_TYPES.INTERNAL_SERVER_ERROR.statusCode).json({
-      message: RESPONSE_TYPES.INTERNAL_SERVER_ERROR.message,
-      status_code: RESPONSE_TYPES.INTERNAL_SERVER_ERROR.statusCode,
-      detail: "auth-controller === verifyPhone == trycatch",
-      error,
-    });
+    return TRY_CATCH_ERROR_RESPONSE(res, error);
   }
 };
 
@@ -176,73 +129,37 @@ module.exports.resendVerificationCode = async (req, res, next) => {
       errors.push({ key: "phone", message: "phone number is required!" });
     }
     if (errors.length > 0) {
-      return res.status(RESPONSE_TYPES.INVALID_INPUT.statusCode).json({
-        message: RESPONSE_TYPES.INVALID_INPUT.message,
-        success: false,
-        status_code: RESPONSE_TYPES.INVALID_INPUT.statusCode,
-        errors: errors,
-      });
+      return INVALID_INPUT_RESPONSE(res, errors);
     }
     const users = await User.findAll({ where: { phone: phone } });
     const user = users[0];
     if (!user) {
-      return res.status(RESPONSE_TYPES.NOT_FOUND.statusCode).json({
-        message: RESPONSE_TYPES.NOT_FOUND.message,
-        success: false,
-        status_code: RESPONSE_TYPES.NOT_FOUND.statusCode,
-      });
+      return NOT_FOUND_RESPONSE(res);
     }
     const storeUserVerifyCodeResult = await storeUserVerifyCode(user);
-    return res.status(RESPONSE_TYPES.SUCCESS.statusCode).json({
-      data: {
-        message: "Code send successfully!",
-      },
-      success: true,
-      status_code: RESPONSE_TYPES.SUCCESS.statusCode,
-    });
+    return SUCCESS_RESPONSE(res, null, "Code send successfully!");
   } catch (error) {
-    return res.status(RESPONSE_TYPES.INTERNAL_SERVER_ERROR.statusCode).json({
-      message: RESPONSE_TYPES.INTERNAL_SERVER_ERROR.message,
-      status_code: RESPONSE_TYPES.INTERNAL_SERVER_ERROR.statusCode,
-      detail: "auth-controller === verifyPhone == trycatch",
-      error,
-    });
+    return TRY_CATCH_ERROR_RESPONSE(res, error);
   }
 };
 
 module.exports.checkLoginStatus = async (req, res, next) => {
   try {
     if (!req.isAuth) {
-      return res.status(RESPONSE_TYPES.UNAUTHENTICATED.statusCode).json({
-        message: RESPONSE_TYPES.UNAUTHENTICATED.message,
-        success: false,
-        status_code: RESPONSE_TYPES.UNAUTHENTICATED.statusCode,
-      });
+      return UNAUTHENTICATED_RESPONSE(res);
     } else {
       const { userPhone } = req;
       const users = await User.findAll({ where: { phone: userPhone } });
       const user = users[0];
       if (!user) {
-        return res.status(RESPONSE_TYPES.NOT_FOUND.statusCode).json({
-          message: RESPONSE_TYPES.NOT_FOUND.message,
-          success: false,
-          status_code: RESPONSE_TYPES.NOT_FOUND.statusCode,
-        });
+        return NOT_FOUND_RESPONSE(res);
       } else {
-        return res.status(RESPONSE_TYPES.SUCCESS.statusCode).json({
-          data: user,
-          success: true,
-          status_code: RESPONSE_TYPES.SUCCESS.statusCode,
-        });
+        const userData = user.dataValues;
+        return SUCCESS_RESPONSE(res, userData);
       }
     }
   } catch (error) {
-    return res.status(RESPONSE_TYPES.INTERNAL_SERVER_ERROR.statusCode).json({
-      message: RESPONSE_TYPES.INTERNAL_SERVER_ERROR.message,
-      status_code: RESPONSE_TYPES.INTERNAL_SERVER_ERROR.statusCode,
-      detail: "auth-controller === getProfileData == trycatch",
-      error,
-    });
+    return TRY_CATCH_ERROR_RESPONSE(res, error);
   }
 };
 

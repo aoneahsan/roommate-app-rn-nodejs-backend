@@ -1,56 +1,42 @@
 // Core Imports
-// const validator = require("validator");
 
 // Custom Imports
-const User = require("./../../models/user");
+const {
+  TRY_CATCH_ERROR_RESPONSE,
+  SUCCESS_RESPONSE,
+  NOT_FOUND_RESPONSE,
+  UNAUTHENTICATED_RESPONSE,
+} = require("./../../utils");
 const CONFIG = require("./../../config");
-const RESPONSE_TYPES = require("./../../response-types");
-// const Role = require("../../models/role");
+// Models
+const User = require("./../../models/user");
 
 module.exports.getProfileData = async (req, res, next) => {
   try {
     if (!req.isAuth) {
-      return res.status(RESPONSE_TYPES.UNAUTHENTICATED.statusCode).json({
-        message: RESPONSE_TYPES.UNAUTHENTICATED.message,
-        success: false,
-        status_code: RESPONSE_TYPES.UNAUTHENTICATED.statusCode,
-      });
+      return UNAUTHENTICATED_RESPONSE(res);
     } else {
       const { userPhone } = req; // stored in req from auth-middleware, for detail read auth-middlware fiel
       const users = await User.findAll({ where: { phone: userPhone } });
       const user = users[0];
       if (!user) {
-        return res.status(RESPONSE_TYPES.NOT_FOUND.statusCode).json({
-          message: RESPONSE_TYPES.NOT_FOUND.message,
-          success: false,
-          status_code: RESPONSE_TYPES.NOT_FOUND.statusCode,
-        });
+        return NOT_FOUND_RESPONSE(res);
       } else {
-        return res.status(RESPONSE_TYPES.SUCCESS.statusCode).json({
-          data: user,
-          success: true,
-          status_code: RESPONSE_TYPES.SUCCESS.statusCode,
-        });
+        const userData = user.dataValues;
+        const profileImages = await user.getUserProfileImages();
+        const resData = { ...userData, profileImages: profileImages };
+        return SUCCESS_RESPONSE(res, resData);
       }
     }
   } catch (error) {
-    return res.status(RESPONSE_TYPES.INTERNAL_SERVER_ERROR.statusCode).json({
-      message: RESPONSE_TYPES.INTERNAL_SERVER_ERROR.message,
-      status_code: RESPONSE_TYPES.INTERNAL_SERVER_ERROR.statusCode,
-      detail: "user-controller === getProfileData == trycatch",
-      error,
-    });
+    return TRY_CATCH_ERROR_RESPONSE(res, error);
   }
 };
 
 module.exports.updateProfile = async (req, res, next) => {
   try {
     if (!req.isAuth) {
-      return res.status(RESPONSE_TYPES.UNAUTHENTICATED.statusCode).json({
-        message: RESPONSE_TYPES.UNAUTHENTICATED.message,
-        success: false,
-        status_code: RESPONSE_TYPES.UNAUTHENTICATED.statusCode,
-      });
+      return UNAUTHENTICATED_RESPONSE(res);
     } else {
       const { userPhone } = req; // stored in req from auth-middleware, for detail read auth-middlware fiel
       const {
@@ -64,11 +50,7 @@ module.exports.updateProfile = async (req, res, next) => {
       const users = await User.findAll({ where: { phone: userPhone } });
       const user = users[0];
       if (!user) {
-        return res.status(RESPONSE_TYPES.NOT_FOUND.statusCode).json({
-          message: RESPONSE_TYPES.NOT_FOUND.message,
-          success: false,
-          status_code: RESPONSE_TYPES.NOT_FOUND.statusCode,
-        });
+        return NOT_FOUND_RESPONSE(res);
       } else {
         user.name = name ? name : user.name;
         user.age = age ? age : user.age;
@@ -79,53 +61,28 @@ module.exports.updateProfile = async (req, res, next) => {
         user.hometown = hometown ? hometown : user.hometown;
         user.language = language ? language : user.language;
         const result = await user.save();
-        return res.status(RESPONSE_TYPES.SUCCESS.statusCode).json({
-          data: user,
-          success: true,
-          status_code: RESPONSE_TYPES.SUCCESS.statusCode,
-        });
+        const userData = user.dataValues;
+        return SUCCESS_RESPONSE(res, userData);
       }
     }
   } catch (error) {
-    return res.status(RESPONSE_TYPES.INTERNAL_SERVER_ERROR.statusCode).json({
-      message: RESPONSE_TYPES.INTERNAL_SERVER_ERROR.message,
-      status_code: RESPONSE_TYPES.INTERNAL_SERVER_ERROR.statusCode,
-      detail: "user-controller === getProfileData == trycatch",
-      error,
-    });
+    return TRY_CATCH_ERROR_RESPONSE(res, error);
   }
 };
 
 module.exports.getUsersList = async (req, res, next) => {
   try {
     if (!req.isAuth) {
-      return res.status(RESPONSE_TYPES.UNAUTHENTICATED.statusCode).json({
-        message: RESPONSE_TYPES.UNAUTHENTICATED.message,
-        success: false,
-        status_code: RESPONSE_TYPES.UNAUTHENTICATED.statusCode,
-      });
+      return UNAUTHENTICATED_RESPONSE(res);
     } else {
       const users = await User.findAll();
       if (!users) {
-        return res.status(RESPONSE_TYPES.NOT_FOUND.statusCode).json({
-          message: RESPONSE_TYPES.NOT_FOUND.message,
-          success: false,
-          status_code: RESPONSE_TYPES.NOT_FOUND.statusCode,
-        });
+        return NOT_FOUND_RESPONSE(res);
       } else {
-        return res.status(RESPONSE_TYPES.SUCCESS.statusCode).json({
-          data: users,
-          success: true,
-          status_code: RESPONSE_TYPES.SUCCESS.statusCode,
-        });
+        return SUCCESS_RESPONSE(res, users);
       }
     }
   } catch (error) {
-    return res.status(RESPONSE_TYPES.INTERNAL_SERVER_ERROR.statusCode).json({
-      message: RESPONSE_TYPES.INTERNAL_SERVER_ERROR.message,
-      status_code: RESPONSE_TYPES.INTERNAL_SERVER_ERROR.statusCode,
-      detail: "user-controller === getProfileData == trycatch",
-      error,
-    });
+    return TRY_CATCH_ERROR_RESPONSE(res, error);
   }
 };

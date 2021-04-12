@@ -66,20 +66,16 @@ const expressApp = express();
 expressApp.use(cors());
 
 // **********************************************************************************
-// bodyParser
-expressApp.use(bodyParser.urlencoded({ extended: false }));
-
-// **********************************************************************************
 // multer
-const multerFileStorageConfig = multer.diskStorage({
-  destination: (res, file, callback) => {
-    callback(null, "images"); // this callback is required to let req continue to next middleware, (first parameter of this callback is an optional error object, throw error if you need or pass null to let request continue, like we did here)
-  },
-  filename: (res, file, callback) => {
-    const random = new Date().toISOString();
-    callback(null, random + "-" + file.originalname);
-  },
-});
+// const multerFileStorageConfig = multer.diskStorage({
+//   destination: (res, file, callback) => {
+//     callback(null, "images"); // this callback is required to let req continue to next middleware, (first parameter of this callback is an optional error object, throw error if you need or pass null to let request continue, like we did here)
+//   },
+//   filename: (res, file, callback) => {
+//     const random = new Date().toISOString();
+//     callback(null, random + "-" + file.originalname);
+//   },
+// });
 
 // **********************************************************************************
 // **********************************************************************************
@@ -87,11 +83,12 @@ const multerFileStorageConfig = multer.diskStorage({
 // **********************************************************************************
 // **********************************************************************************
 // body-parser middleware to add this package functionality
+expressApp.use(bodyParser.urlencoded({ extended: false }));
 expressApp.use(bodyParser.json());
 
 // **********************************************************************************
 // multer middleware to add this package functionality
-// expressApp.use(multer({ storage: multerFileStorageConfig }).single("file")); // here "file" is the file name we will recieve inside req object while processing upload file requests
+expressApp.use(multer().single("file")); // here "file" is the file name we will recieve inside req object while processing upload file requests
 
 // **********************************************************************************
 // site images/static-resources middleware (this will return site static files)
