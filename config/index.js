@@ -1,6 +1,6 @@
 let DB, DB_USER, DB_PASS, DB_HOST, DB_DIALECT, DB_PORT, SERVER_PORT;
-// const ACTIVE_DB_ENV = "local";
-const ACTIVE_DB_ENV = "production";
+const ACTIVE_DB_ENV = "local";
+// const ACTIVE_DB_ENV = "production";
 if (ACTIVE_DB_ENV == "local") {
   DB = "nodejs_fiverr_roommate-app-db";
   DB_USER = "root";
@@ -8,7 +8,6 @@ if (ACTIVE_DB_ENV == "local") {
   DB_HOST = "localhost";
   DB_DIALECT = "mysql";
   DB_PORT = 3306;
-
   SERVER_PORT = 3020;
 } else {
   DB = "roommate";
@@ -18,7 +17,7 @@ if (ACTIVE_DB_ENV == "local") {
   DB_DIALECT = "mysql";
   DB_PORT = 3306;
 
-  SERVER_PORT = 80;
+  SERVER_PORT = 3020;
 }
 
 module.exports = {
