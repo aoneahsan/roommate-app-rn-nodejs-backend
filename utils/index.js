@@ -63,13 +63,9 @@ module.exports.USER_EXISTS_RESPONSE = (res) => {
   });
 };
 
-module.exports.SUCCESS_RESPONSE = (
-  res,
-  data,
-  message = RESPONSE_TYPES.SUCCESS.message
-) => {
+module.exports.SUCCESS_RESPONSE = (res, data) => {
   return res.status(RESPONSE_TYPES.SUCCESS.statusCode).json({
-    message: message,
+    message: RESPONSE_TYPES.SUCCESS.message,
     data: data,
     success: true,
     status_code: RESPONSE_TYPES.SUCCESS.statusCode,

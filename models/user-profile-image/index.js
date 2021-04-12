@@ -9,19 +9,23 @@ const UserProfileImage = sequelize.define("userProfileImage", {
     allowNull: false,
     primaryKey: true,
   },
-  file_type: {
+  type: {
     type: Sequelize.STRING,
     allowNull: true,
   },
-  file_size: {
+  size: {
     type: Sequelize.STRING,
     allowNull: true,
   },
-  file_path: {
+  name: {
     type: Sequelize.STRING,
     allowNull: true,
   },
-  file_url: {
+  url: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
+  order: {
     type: Sequelize.STRING,
     allowNull: true,
   },

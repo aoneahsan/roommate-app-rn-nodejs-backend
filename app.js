@@ -42,7 +42,6 @@ const UserRoleModel = require("./models/user-role");
 // Routes Imports
 const authRoutes = require("./routes/auth-routes");
 const userRoutes = require("./routes/user-routes");
-const fileUploadRoutes = require("./routes/file-upload-routes");
 
 // **********************************************************************************
 // Controller Imports
@@ -156,8 +155,6 @@ expressApp.use((err, req, res, next) => {
 // Adding Routes Middlewares
 // **********************************************************************************
 // **********************************************************************************
-// upload files middleware (to allow files upload)
-expressApp.use("/api/v1", fileUploadRoutes);
 // Auth Routes Middleware
 expressApp.use("/api/v1", authRoutes);
 // User Routes Middleware
@@ -191,7 +188,7 @@ UserProfileImageModel.belongsTo(UserModel, {
 // **********************************************************************************
 // **********************************************************************************
 sequelize
-  // .sync({force: true})
+  // .sync({ force: true }) // don't uncomment in production, this will delete all tables and data from Database
   .sync()
   .then((res) => {
     // console.log(`app.js === sequelize.sync == success = `, {res});

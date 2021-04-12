@@ -136,7 +136,7 @@ module.exports.resendVerificationCode = async (req, res, next) => {
       return NOT_FOUND_RESPONSE(res);
     }
     const storeUserVerifyCodeResult = await storeUserVerifyCode(user);
-    return SUCCESS_RESPONSE(res, null, "Code send successfully!");
+    return SUCCESS_RESPONSE(res, null);
   } catch (error) {
     return TRY_CATCH_ERROR_RESPONSE(res, error);
   }
@@ -165,13 +165,13 @@ module.exports.checkLoginStatus = async (req, res, next) => {
 // Private Funstions
 
 const sendSms = async (phone, message) => {
-  // const response = await twilioClient.messages.create({
-  //   body: message,
-  //   from: CONFIG.TWILIO_FROM_NUMBER,
-  //   to: phone,
-  // });
-  // console.log("auth-controller === sendSms == res = ".bgGreen, { response });
-  // return response;
+  const response = await twilioClient.messages.create({
+    body: message,
+    from: CONFIG.TWILIO_FROM_NUMBER,
+    to: phone,
+  });
+  console.log("auth-controller === sendSms == res = ".bgGreen, { response });
+  return response;
   return true; // when uncomment above code remove this line
 };
 
