@@ -1,5 +1,9 @@
+// Core Imports
 const fs = require("fs");
 const path = require("path");
+
+// Custom Imports
+const RESPONSE_TYPES = require("./../response-types");
 
 // Util Functions
 module.exports.removeImage = async (filePath) => {

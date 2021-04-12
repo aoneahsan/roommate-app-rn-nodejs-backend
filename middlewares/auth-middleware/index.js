@@ -15,12 +15,16 @@ const authMiddleware = async (req, res, next) => {
     req.isAuth = false;
     return next();
   } else {
-    const token = authToken.split(" ")[1];
+    // const token = authToken.split(" ")[1]; // if you are a fan of send auth token with 'Bearer ' from frontend then use this, i'm just passing auth token from frontend that's why directly parsing token
+    const token = authToken;
     let decodedToken;
     try {
-      decodedToken = jwt.verify(token, CONFIG.JSON_WEB_TOKEN_SECRET);
+      decodedToken = jwt.verify(token, CONFIG.JWT_SECRET);
     } catch (error) {
       // error occured while verifing token, so mark auth as false and continue to next middleware
+      console.log("auth-middleware === trycatch jwt.verify == error = ", {
+        error,
+      });
       req.isAuth = false;
       return next();
     }
@@ -34,8 +38,9 @@ const authMiddleware = async (req, res, next) => {
       return next();
     } else {
       req.isAuth = true;
-      req.userId = decodedToken.userId.toString();
-      req.userPhone = decodedToken.phone;
+      req.userId = decodedToken.userId;
+      req.userName = decodedToken.userName;
+      req.userPhone = decodedToken.userPhone;
       return next();
     }
   }

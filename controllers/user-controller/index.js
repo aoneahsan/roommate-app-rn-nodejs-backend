@@ -10,6 +10,7 @@ const {
 const CONFIG = require("./../../config");
 // Models
 const User = require("./../../models/user");
+const UserProfileImage = require("./../../models/user-profile-image");
 
 module.exports.getProfileData = async (req, res, next) => {
   try {
@@ -47,6 +48,14 @@ module.exports.updateProfile = async (req, res, next) => {
         hometown,
         language,
       } = req.body;
+      console.log("user-controller === updateProfile == req.body = ", {
+        name,
+        age,
+        gender,
+        constellations,
+        hometown,
+        language,
+      });
       const users = await User.findAll({ where: { phone: userPhone } });
       const user = users[0];
       if (!user) {
@@ -75,7 +84,13 @@ module.exports.getUsersList = async (req, res, next) => {
     if (!req.isAuth) {
       return UNAUTHENTICATED_RESPONSE(res);
     } else {
-      const users = await User.findAll();
+      const users = await User.findAll({
+        include: [
+          {
+            model: UserProfileImage,
+          },
+        ],
+      });
       if (!users) {
         return NOT_FOUND_RESPONSE(res);
       } else {

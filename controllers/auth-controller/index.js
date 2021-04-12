@@ -13,7 +13,6 @@ const {
   JWT_TOKEN_CREATION_ERROR_RESPONSE,
 } = require("./../../utils");
 const CONFIG = require("./../../config");
-const RESPONSE_TYPES = require("./../../response-types");
 const twilioClient = require("./../../twilio-client");
 // Models
 const User = require("./../../models/user");
@@ -195,7 +194,7 @@ const createAuthTokenAndClearVerifyCode = async (user) => {
   user.phone_verify_code_expireIn = null;
   const result = await user.save();
   const token = await JWT.sign(
-    { id: user.id, phone: user.phone, name: user.name },
+    { userId: user.id, userPhone: user.phone, userName: user.name },
     CONFIG.JWT_SECRET,
     { expiresIn: CONFIG.JWT_EXPIRE_TIME }
   );
