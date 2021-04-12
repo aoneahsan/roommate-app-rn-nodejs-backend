@@ -18,7 +18,7 @@ if (ACTIVE_DB_ENV == "local") {
   DB_DIALECT = "mysql";
   DB_PORT = 3306;
 
-  SERVER_PORT = 3020;
+  SERVER_PORT = 80;
 }
 
 module.exports = {
