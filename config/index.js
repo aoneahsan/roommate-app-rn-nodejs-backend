@@ -1,6 +1,6 @@
 let DB, DB_USER, DB_PASS, DB_HOST, DB_DIALECT, DB_PORT, SERVER_PORT;
-// const ACTIVE_DB_ENV = "local";
-const ACTIVE_DB_ENV = "production";
+const ACTIVE_DB_ENV = "local";
+// const ACTIVE_DB_ENV = "production";
 if (ACTIVE_DB_ENV == "local") {
   DB = "nodejs_fiverr_roommate-app-db";
   DB_USER = "root";
@@ -50,6 +50,12 @@ module.exports = {
   TWILIO_TOKEN: "a53a9e6ab66dc82eca45ccc2d5483f7d",
   TWILIO_FROM_NUMBER: "+19414512860",
 
+  // AWS Details
+  AWS_ACCESS_KEY: "AKIA2HGZB5LADNTSWI2C",
+  AWS_SECRET_KEY: "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",
+  AWS_S3_BUCKET_NAME: "roommate",
+  AWS_S3_BUCKET_REGION: "ap-southeast-1",
+
   // Default Models Data Config
   // Default Roles
   DEFAULT_ROLES: {
@@ -66,24 +72,34 @@ module.exports = {
   // Default Users
   DEFAULT_USERS: {
     admin: {
-      name: "admin user",
+      name: "js",
       username: "admin",
       email: "admin@demo.com",
       password: "123456",
       online_status: "active",
       phone: "3046619706",
-      country_code: "+92",
+      country_code: "92",
+      age: "25-30",
+      gender: "female",
+      constellations: "Aries",
+      hometown: "Ontario2",
+      language: "English",
       // role: //this will be set automatically while creating default user
     },
     customer: {
-      full_name: "customer user",
+      name: "java",
       username: "customer",
       email: "customer@demo.com",
       tag_line: "customer user of chat app",
       password: "123456",
       online_status: "active",
       phone: "3084618263",
-      country_code: "+92",
+      country_code: "92",
+      age: "30-35",
+      gender: "male",
+      constellations: "Aries",
+      hometown: "Ontario2",
+      language: "Franch",
       // role: //this will be set automatically while creating default user
     },
   },

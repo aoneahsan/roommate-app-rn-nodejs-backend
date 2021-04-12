@@ -37,9 +37,15 @@ module.exports = async (req, res, next) => {
       const adminRole = availableRoles.find((el) => el.title == "admin");
       const createdAdminUser = await User.create({
         username: adminData.username,
+        name: adminData.name,
         phone: adminData.phone,
         country_code: adminData.country_code,
         status: adminData.status,
+        age: adminData.age,
+        gender: adminData.gender,
+        constellations: adminData.constellations,
+        hometown: adminData.hometown,
+        language: adminData.language,
       });
       await createdAdminUser.addRole(adminRole);
     }
@@ -52,9 +58,15 @@ module.exports = async (req, res, next) => {
       const customerRole = availableRoles.find((el) => el.title == "customer");
       const createdCustomer = await User.create({
         username: customerData.username,
+        name: customerData.name,
         status: customerData.status,
         phone: customerData.phone,
         country_code: customerData.country_code,
+        age: customerData.age,
+        gender: customerData.gender,
+        constellations: customerData.constellations,
+        hometown: customerData.hometown,
+        language: customerData.language,
       });
       await createdCustomer.addRole(customerRole);
     }

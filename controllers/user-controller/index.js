@@ -16,7 +16,7 @@ module.exports.getProfileData = async (req, res, next) => {
         status_code: RESPONSE_TYPES.UNAUTHENTICATED.statusCode,
       });
     } else {
-      const { userPhone } = req;
+      const { userPhone } = req; // stored in req from auth-middleware, for detail read auth-middlware fiel
       const users = await User.findAll({ where: { phone: userPhone } });
       const user = users[0];
       if (!user) {
@@ -28,6 +28,93 @@ module.exports.getProfileData = async (req, res, next) => {
       } else {
         return res.status(RESPONSE_TYPES.SUCCESS.statusCode).json({
           data: user,
+          success: true,
+          status_code: RESPONSE_TYPES.SUCCESS.statusCode,
+        });
+      }
+    }
+  } catch (error) {
+    return res.status(RESPONSE_TYPES.INTERNAL_SERVER_ERROR.statusCode).json({
+      message: RESPONSE_TYPES.INTERNAL_SERVER_ERROR.message,
+      status_code: RESPONSE_TYPES.INTERNAL_SERVER_ERROR.statusCode,
+      detail: "user-controller === getProfileData == trycatch",
+      error,
+    });
+  }
+};
+
+module.exports.updateProfile = async (req, res, next) => {
+  try {
+    if (!req.isAuth) {
+      return res.status(RESPONSE_TYPES.UNAUTHENTICATED.statusCode).json({
+        message: RESPONSE_TYPES.UNAUTHENTICATED.message,
+        success: false,
+        status_code: RESPONSE_TYPES.UNAUTHENTICATED.statusCode,
+      });
+    } else {
+      const { userPhone } = req; // stored in req from auth-middleware, for detail read auth-middlware fiel
+      const {
+        name,
+        age,
+        gender,
+        constellations,
+        hometown,
+        language,
+      } = req.body;
+      const users = await User.findAll({ where: { phone: userPhone } });
+      const user = users[0];
+      if (!user) {
+        return res.status(RESPONSE_TYPES.NOT_FOUND.statusCode).json({
+          message: RESPONSE_TYPES.NOT_FOUND.message,
+          success: false,
+          status_code: RESPONSE_TYPES.NOT_FOUND.statusCode,
+        });
+      } else {
+        user.name = name ? name : user.name;
+        user.age = age ? age : user.age;
+        user.gender = gender ? gender : user.gender;
+        user.constellations = constellations
+          ? constellations
+          : user.constellations;
+        user.hometown = hometown ? hometown : user.hometown;
+        user.language = language ? language : user.language;
+        const result = await user.save();
+        return res.status(RESPONSE_TYPES.SUCCESS.statusCode).json({
+          data: user,
+          success: true,
+          status_code: RESPONSE_TYPES.SUCCESS.statusCode,
+        });
+      }
+    }
+  } catch (error) {
+    return res.status(RESPONSE_TYPES.INTERNAL_SERVER_ERROR.statusCode).json({
+      message: RESPONSE_TYPES.INTERNAL_SERVER_ERROR.message,
+      status_code: RESPONSE_TYPES.INTERNAL_SERVER_ERROR.statusCode,
+      detail: "user-controller === getProfileData == trycatch",
+      error,
+    });
+  }
+};
+
+module.exports.getUsersList = async (req, res, next) => {
+  try {
+    if (!req.isAuth) {
+      return res.status(RESPONSE_TYPES.UNAUTHENTICATED.statusCode).json({
+        message: RESPONSE_TYPES.UNAUTHENTICATED.message,
+        success: false,
+        status_code: RESPONSE_TYPES.UNAUTHENTICATED.statusCode,
+      });
+    } else {
+      const users = await User.findAll();
+      if (!users) {
+        return res.status(RESPONSE_TYPES.NOT_FOUND.statusCode).json({
+          message: RESPONSE_TYPES.NOT_FOUND.message,
+          success: false,
+          status_code: RESPONSE_TYPES.NOT_FOUND.statusCode,
+        });
+      } else {
+        return res.status(RESPONSE_TYPES.SUCCESS.statusCode).json({
+          data: users,
           success: true,
           status_code: RESPONSE_TYPES.SUCCESS.statusCode,
         });
