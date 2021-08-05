@@ -1,6 +1,6 @@
 let DB, DB_USER, DB_PASS, DB_HOST, DB_DIALECT, DB_PORT, SERVER_PORT;
-const ACTIVE_DB_ENV = "local";
-// const ACTIVE_DB_ENV = "production";
+// const ACTIVE_DB_ENV = "local";
+const ACTIVE_DB_ENV = "production";
 if (ACTIVE_DB_ENV == "local") {
   DB = "nodejs_fiverr_roommate-app-db";
   DB_USER = "root";
@@ -54,6 +54,11 @@ module.exports = {
   AWS_SECRET_KEY: "qSmiz1Aal6OxP/rwbcQEhimYKJJyTer/gT+hG8s5",
   AWS_S3_BUCKET_NAME: "roommate",
   AWS_S3_BUCKET_REGION: "ap-southeast-1",
+
+  // AWS SNS Details
+  AWS_SNS_ACCESS_KEY: "AKIA2HGZB5LAKZQXEVFY",
+  AWS_SNS_SECRET_KEY: "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",
+  AWS_SNS_REGION: "us-east-1",
 
   // Default Models Data Config
   // Default Roles

@@ -1,6 +1,7 @@
 // Core Imports
 const JWT = require("jsonwebtoken");
 const colors = require("colors");
+const AWS_SNS_SENDER = require("aws-sdk");
 
 // Custom Imports
 const {
@@ -17,6 +18,12 @@ const twilioClient = require("./../../twilio-client");
 // Models
 const User = require("./../../models/user");
 const Role = require("../../models/role");
+
+AWS_SNS_SENDER.config.update({
+  accessKeyId: CONFIG.AWS_SNS_ACCESS_KEY,
+  secretAccessKey: CONFIG.AWS_SNS_SECRET_KEY,
+  region: CONFIG.AWS_SNS_REGION,
+});
 
 // *********************************************************************
 
@@ -52,7 +59,7 @@ module.exports.signup = async (req, res, next) => {
       country_code: countryCode,
     });
     user.addRole(customerRole);
-    const result = await storeUserVerifyCode(user);
+    const result = await storeUserVerifyCodeAndSendAwsSns(user);
     const userData = user.dataValues;
     return SUCCESS_RESPONSE(res, userData);
   } catch (error) {
@@ -68,7 +75,7 @@ module.exports.login = async (req, res, next) => {
     if (!user) {
       return NOT_FOUND_RESPONSE(res);
     }
-    const result = await storeUserVerifyCode(user);
+    const result = await storeUserVerifyCodeAndSendAwsSns(user);
     const userData = user.dataValues;
     return SUCCESS_RESPONSE(res, userData);
   } catch (error) {
@@ -135,7 +142,9 @@ module.exports.resendVerificationCode = async (req, res, next) => {
     if (!user) {
       return NOT_FOUND_RESPONSE(res);
     }
-    const storeUserVerifyCodeResult = await storeUserVerifyCode(user);
+    const storeUserVerifyCodeResult = await storeUserVerifyCodeAndSendAwsSns(
+      user
+    );
     return SUCCESS_RESPONSE(res, null);
   } catch (error) {
     return TRY_CATCH_ERROR_RESPONSE(res, error);
@@ -172,22 +181,23 @@ const sendSms = async (phone, message) => {
   });
   console.log("auth-controller === sendSms == res = ".bgGreen, { response });
   return response;
-  return true; // when uncomment above code remove this line
+  // return true; // when uncomment above code remove this line
 };
 
-const storeUserVerifyCode = async (user) => {
-  const completePhoneNumber = "+" + user.country_code + user.phone;
-  const newCode = Math.floor(10000000 + Math.random() * 90000000)
-    .toString()
-    .slice(0, 4);
-  const messageBody = "your verification code is " + newCode;
-  const codeExpireTime = new Date(new Date().getTime() + 5 * 60 * 60 * 1000); // code expire time 5h from now
-  const smsresponse = await sendSms(completePhoneNumber, messageBody);
-  user.phone_verify_code = newCode;
-  user.phone_verify_code_expireIn = codeExpireTime;
-  const result = await user.save();
-  return result;
-};
+// const storeUserVerifyCode = async (user) => {  // leave for reference, if needed twilio integration again
+//   // using twilio
+//   const completePhoneNumber = "+" + user.country_code + user.phone;
+//   const newCode = Math.floor(10000000 + Math.random() * 90000000)
+//     .toString()
+//     .slice(0, 4);
+//   const messageBody = "your verification code is " + newCode;
+//   const codeExpireTime = new Date(new Date().getTime() + 5 * 60 * 60 * 1000); // code expire time 5h from now
+//   const smsresponse = await sendSms(completePhoneNumber, messageBody);
+//   user.phone_verify_code = newCode;
+//   user.phone_verify_code_expireIn = codeExpireTime;
+//   const result = await user.save();
+//   return result;
+// };
 
 const createAuthTokenAndClearVerifyCode = async (user) => {
   user.phone_verify_code = null;
@@ -199,4 +209,39 @@ const createAuthTokenAndClearVerifyCode = async (user) => {
     { expiresIn: CONFIG.JWT_EXPIRE_TIME }
   );
   return token;
+};
+
+const storeUserVerifyCodeAndSendAwsSns = async (user) => {
+  // user AWS SNS
+  const completePhoneNumber = "+" + user.country_code + user.phone;
+  const newCode = Math.floor(10000000 + Math.random() * 90000000)
+    .toString()
+    .slice(0, 4);
+  const messageBody = "your verification code is " + newCode;
+  const codeExpireTime = new Date(new Date().getTime() + 5 * 60 * 60 * 1000); // code expire time 5h from now
+  // const smsresponse = await sendSms(completePhoneNumber, messageBody);
+  user.phone_verify_code = newCode;
+  user.phone_verify_code_expireIn = codeExpireTime;
+  const result = await user.save();
+  var params = {
+    Message: messageBody,
+    PhoneNumber: completePhoneNumber,
+    MessageAttributes: {
+      "AWS.SNS.SMS.SenderID": {
+        DataType: "String",
+        StringValue: "PikyMe",
+      },
+    },
+  };
+
+  var publishTextPromise = new AWS_SNS_SENDER.SNS({ apiVersion: "2010-03-31" })
+    .publish(params)
+    .promise();
+
+  const awsSNSResponse = await publishTextPromise;
+  console.log(
+    "auth-controller === storeUserVerifyCodeAWSSNS == awsSNSResponse = ",
+    { awsSNSResponse }
+  );
+  return awsSNSResponse;
 };
