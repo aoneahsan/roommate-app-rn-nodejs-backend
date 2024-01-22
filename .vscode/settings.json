@@ -1,0 +1,7 @@
+{
+	"editor.formatOnSave": true,
+	"files.autoSave": "onWindowChange",
+	"prettier.enable": true,
+	"eslint.enable": true,
+	"standard.enable": true
+}
