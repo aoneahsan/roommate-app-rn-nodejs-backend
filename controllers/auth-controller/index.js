@@ -1,5 +1,5 @@
 // Core Imports
-const JWT = require('jsonwebtoken')
+const JWT = require('jsonwebtoken');
 // const AWS_SNS_SENDER = require('aws-sdk')
 
 // Custom Imports
@@ -11,12 +11,12 @@ const {
 	USER_EXISTS_RESPONSE,
 	UNAUTHENTICATED_RESPONSE,
 	JWT_TOKEN_CREATION_ERROR_RESPONSE,
-} = require('./../../utils')
-const CONFIG = require('./../../config')
+} = require('./../../utils');
+const CONFIG = require('./../../config');
 // const twilioClient = require('./../../twilio-client')
 // Models
-const User = require('./../../models/user')
-const Role = require('../../models/role')
+const User = require('./../../models/user');
+const Role = require('../../models/role');
 
 // try {
 // 	AWS_SNS_SENDER.config.update({
@@ -32,160 +32,161 @@ const Role = require('../../models/role')
 
 module.exports.signup = async (req, res, next) => {
 	try {
-		const { phone, countryCode } = req.body
-		let errors = []
+		const { phone, countryCode } = req.body;
+		let errors = [];
 		if (!phone) {
-			errors.push({ key: 'phone', message: 'phone number is required!' })
+			errors.push({ key: 'phone', message: 'phone number is required!' });
 		}
 		if (!countryCode) {
-			errors.push({ key: 'countryCode', message: 'country code is required!' })
+			errors.push({ key: 'countryCode', message: 'country code is required!' });
 		}
 		if (errors.length > 0) {
-			return INVALID_INPUT_RESPONSE(res, errors)
+			return INVALID_INPUT_RESPONSE(res, errors);
 		}
-		const users = await User.findAll({ where: { phone: phone } })
-		const userExists = users[0]
+		const users = await User.findAll({ where: { phone: phone } });
+		const userExists = users[0];
 		if (userExists) {
-			return USER_EXISTS_RESPONSE(res)
+			return USER_EXISTS_RESPONSE(res);
 		}
 		const availableRoles = await Role.findAll({
 			where: {
 				title: 'customer',
 			},
-		})
-		const customerRole = availableRoles[0]
+		});
+		const customerRole = availableRoles[0];
 		if (!customerRole) {
-			return NOT_FOUND_RESPONSE(res)
+			return NOT_FOUND_RESPONSE(res);
 		}
 		const user = await User.create({
 			phone: phone,
 			country_code: countryCode,
-		})
-		user.addRole(customerRole)
+		});
+		user.addRole(customerRole);
 
-		await storeUserVerifyCodeAndSendAwsSns(user)
+		await storeUserVerifyCodeAndSendAwsSns(user);
 
-		const userData = user.dataValues
-		return SUCCESS_RESPONSE(res, userData)
+		const userData = user.dataValues;
+		return SUCCESS_RESPONSE(res, userData);
 	} catch (error) {
-		return TRY_CATCH_ERROR_RESPONSE(res, error)
+		return TRY_CATCH_ERROR_RESPONSE(res, error);
 	}
-}
+};
 
 module.exports.login = async (req, res, next) => {
 	try {
-		console.log({ body: req.body })
-		const { phone } = req.body
-		const users = await User.findAll({ where: { phone: phone } })
-		const user = users[0]
+		const { phone } = req.body;
+		const users = await User.findAll({ where: { phone: phone } });
+		const user = users[0];
 		if (!user) {
-			return NOT_FOUND_RESPONSE(res)
+			return NOT_FOUND_RESPONSE(res);
 		}
 
-		await storeUserVerifyCodeAndSendAwsSns(user)
+		await storeUserVerifyCodeAndSendAwsSns(user);
 
-		const userData = user.dataValues
-		const token = await createAuthTokenAndClearVerifyCode(user)
+		const userData = user.dataValues;
+		const token = await createAuthTokenAndClearVerifyCode(user);
 		if (!token) {
-			return JWT_TOKEN_CREATION_ERROR_RESPONSE(res, error)
+			return JWT_TOKEN_CREATION_ERROR_RESPONSE(res, error);
 		}
 		const resData = {
 			...userData,
 			token: token,
-		}
-		return SUCCESS_RESPONSE(res, resData)
+		};
+		return SUCCESS_RESPONSE(res, resData);
 	} catch (error) {
-		return TRY_CATCH_ERROR_RESPONSE(res, error)
+		return TRY_CATCH_ERROR_RESPONSE(res, error);
 	}
-}
+};
 
 module.exports.verifyPhone = async (req, res, next) => {
 	try {
-		const { phone, verifyCode } = req.body
+		const { phone, verifyCode } = req.body;
 
-		let errors = []
+		let errors = [];
 		if (!phone) {
-			errors.push({ key: 'phone', message: 'phone number is required!' })
+			errors.push({ key: 'phone', message: 'phone number is required!' });
 		}
 		if (!verifyCode) {
 			errors.push({
 				key: 'verifyCode',
 				message: 'verification code is required!',
-			})
+			});
 		}
 		if (errors.length > 0) {
-			return INVALID_INPUT_RESPONSE(res, errors)
+			return INVALID_INPUT_RESPONSE(res, errors);
 		}
-		const users = await User.findAll({ where: { phone: phone } })
-		const user = users[0]
+		const users = await User.findAll({ where: { phone: phone } });
+		const user = users[0];
 		if (!user) {
-			return NOT_FOUND_RESPONSE(res)
+			return NOT_FOUND_RESPONSE(res);
 		}
 		if (user.phone_verify_code != verifyCode) {
 			const errors = [
 				{ key: 'verify_code', message: 'Invalid verification code' },
-			]
-			return INVALID_INPUT_RESPONSE(res, errors)
+			];
+			return INVALID_INPUT_RESPONSE(res, errors);
 		}
-		user.phone_verify_code = null
-		await user.save()
+		user.phone_verify_code = null;
+		await user.save();
 
-		const token = await createAuthTokenAndClearVerifyCode(user)
+		const token = await createAuthTokenAndClearVerifyCode(user);
 		if (!token) {
-			return JWT_TOKEN_CREATION_ERROR_RESPONSE(res, error)
+			return JWT_TOKEN_CREATION_ERROR_RESPONSE(res, error);
 		}
-		const userData = user.dataValues
+		const userData = user.dataValues;
 		const resData = {
 			...userData,
 			token: token,
-		}
-		return SUCCESS_RESPONSE(res, resData)
+		};
+
+		return SUCCESS_RESPONSE(res, resData);
 	} catch (error) {
-		return TRY_CATCH_ERROR_RESPONSE(res, error)
+		return TRY_CATCH_ERROR_RESPONSE(res, error);
 	}
-}
+};
 
 module.exports.resendVerificationCode = async (req, res, next) => {
 	try {
-		const { phone } = req.body
-		let errors = []
+		const { phone } = req.body;
+
+		let errors = [];
 		if (!phone) {
-			errors.push({ key: 'phone', message: 'phone number is required!' })
+			errors.push({ key: 'phone', message: 'phone number is required!' });
 		}
 		if (errors.length > 0) {
-			return INVALID_INPUT_RESPONSE(res, errors)
+			return INVALID_INPUT_RESPONSE(res, errors);
 		}
-		const users = await User.findAll({ where: { phone: phone } })
-		const user = users[0]
+		const users = await User.findAll({ where: { phone: phone } });
+		const user = users[0];
 		if (!user) {
-			return NOT_FOUND_RESPONSE(res)
+			return NOT_FOUND_RESPONSE(res);
 		}
-		await storeUserVerifyCodeAndSendAwsSns(user)
-		return SUCCESS_RESPONSE(res, null)
+		await storeUserVerifyCodeAndSendAwsSns(user);
+		return SUCCESS_RESPONSE(res, null);
 	} catch (error) {
-		return TRY_CATCH_ERROR_RESPONSE(res, error)
+		return TRY_CATCH_ERROR_RESPONSE(res, error);
 	}
-}
+};
 
 module.exports.checkLoginStatus = async (req, res, next) => {
 	try {
 		if (!req.isAuth) {
-			return UNAUTHENTICATED_RESPONSE(res)
+			return UNAUTHENTICATED_RESPONSE(res);
 		} else {
-			const { userPhone } = req
-			const users = await User.findAll({ where: { phone: userPhone } })
-			const user = users[0]
+			const { userPhone } = req;
+			const users = await User.findAll({ where: { phone: userPhone } });
+			const user = users[0];
 			if (!user) {
-				return NOT_FOUND_RESPONSE(res)
+				return NOT_FOUND_RESPONSE(res);
 			} else {
-				const userData = user.dataValues
-				return SUCCESS_RESPONSE(res, userData)
+				const userData = user.dataValues;
+				return SUCCESS_RESPONSE(res, userData);
 			}
 		}
 	} catch (error) {
-		return TRY_CATCH_ERROR_RESPONSE(res, error)
+		return TRY_CATCH_ERROR_RESPONSE(res, error);
 	}
-}
+};
 
 // Private Funstions
 
@@ -197,7 +198,7 @@ const sendSms = async (phone, message) => {
 	// })
 	// return response
 	// return true; // when uncomment above code remove this line
-}
+};
 
 // const storeUserVerifyCode = async (user) => {  // leave for reference, if needed twilio integration again
 //   // using twilio
@@ -215,32 +216,32 @@ const sendSms = async (phone, message) => {
 // };
 
 const createAuthTokenAndClearVerifyCode = async (user) => {
-	user.phone_verify_code = null
-	user.phone_verify_code_expireIn = null
-	await user.save()
+	user.phone_verify_code = null;
+	user.phone_verify_code_expireIn = null;
+	await user.save();
 
 	const token = JWT.sign(
 		{ userId: user.id, userPhone: user.phone, userName: user.name },
 		CONFIG.JWT_SECRET,
 		{ expiresIn: CONFIG.JWT_EXPIRE_TIME }
-	)
-	return token
-}
+	);
+	return token;
+};
 
 const storeUserVerifyCodeAndSendAwsSns = async (user) => {
 	// user AWS SNS
-	const completePhoneNumber = '+' + user.country_code + user.phone
+	const completePhoneNumber = '+' + user.country_code + user.phone;
 
 	// INFO: once we re-enable the AWS Services we will enable this as well, for now we will just send the "0000" as login code
 	// const newCode = Math.floor(10000000 + Math.random() * 90000000)
 	// 	.toString()
 	// 	.slice(0, 4)
-	const newCode = '0000'
-	const messageBody = 'your verification code is ' + newCode
-	const codeExpireTime = new Date(new Date().getTime() + 5 * 60 * 60 * 1000) // code expire time 5h from now
-	user.phone_verify_code = newCode
-	user.phone_verify_code_expireIn = codeExpireTime
-	await user.save()
+	const newCode = '0000';
+	const messageBody = 'your verification code is ' + newCode;
+	const codeExpireTime = new Date(new Date().getTime() + 5 * 60 * 60 * 1000); // code expire time 5h from now
+	user.phone_verify_code = newCode;
+	user.phone_verify_code_expireIn = codeExpireTime;
+	await user.save();
 
 	// var params = {
 	// 	Message: messageBody,
@@ -260,4 +261,4 @@ const storeUserVerifyCodeAndSendAwsSns = async (user) => {
 
 	// const awsSNSResponse = await publishTextPromise
 	// return awsSNSResponse
-}
+};
