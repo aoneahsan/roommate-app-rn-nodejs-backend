@@ -4,11 +4,11 @@
 // **********************************************************************************
 // **********************************************************************************
 // NMP Packages Imports
-const express = require('express')
-const path = require('path')
-const bodyParser = require('body-parser')
-const multer = require('multer')
-const cors = require('cors')
+const express = require('express');
+const path = require('path');
+const bodyParser = require('body-parser');
+const multer = require('multer');
+const cors = require('cors');
 
 // **********************************************************************************
 // **********************************************************************************
@@ -16,40 +16,40 @@ const cors = require('cors')
 // **********************************************************************************
 // **********************************************************************************
 // Database Import
-const sequelize = require('./database')
+const sequelize = require('./database');
 
 // **********************************************************************************
 // Config Import
-const CONFIG = require('./config')
+const CONFIG = require('./config');
 
 // **********************************************************************************
 // Response Types
-const RESPONSE_TYPES = require('./response-types')
+const RESPONSE_TYPES = require('./response-types');
 
 // **********************************************************************************
 // Models Imports
-const UserModel = require('./models/user')
-const UserProfileImageModel = require('./models/user-profile-image')
-const RoleModel = require('./models/role')
-const UserRoleModel = require('./models/user-role')
+const UserModel = require('./models/user');
+const UserProfileImageModel = require('./models/user-profile-image');
+const RoleModel = require('./models/role');
+const UserRoleModel = require('./models/user-role');
 
 // **********************************************************************************
 // Routes Imports
-const authRoutes = require('./routes/auth-routes')
-const userRoutes = require('./routes/user-routes')
+const authRoutes = require('./routes/auth-routes');
+const userRoutes = require('./routes/user-routes');
 
 // **********************************************************************************
 // Controller Imports
 
 // **********************************************************************************
 // Middleware Imports
-const roleMiddleware = require('./middlewares/role-middleware')
-const userMiddleware = require('./middlewares/user-middleware')
-const authMiddleware = require('./middlewares/auth-middleware')
+const roleMiddleware = require('./middlewares/role-middleware');
+const userMiddleware = require('./middlewares/user-middleware');
+const authMiddleware = require('./middlewares/auth-middleware');
 
 // **********************************************************************************
 // creating app instance
-const expressApp = express()
+const expressApp = express();
 
 // **********************************************************************************
 // **********************************************************************************
@@ -57,7 +57,7 @@ const expressApp = express()
 // **********************************************************************************
 // **********************************************************************************
 // CORS middleware
-expressApp.use(cors())
+expressApp.use(cors());
 
 // **********************************************************************************
 // multer
@@ -73,52 +73,52 @@ expressApp.use(cors())
 
 // **********************************************************************************
 // **********************************************************************************
-// Adding Middlwares
+// Adding Middlewares
 // **********************************************************************************
 // **********************************************************************************
 // body-parser middleware to add this package functionality
-expressApp.use(bodyParser.urlencoded({ extended: false }))
-expressApp.use(bodyParser.json())
+expressApp.use(bodyParser.urlencoded({ extended: false }));
+expressApp.use(bodyParser.json());
 
 // **********************************************************************************
 // multer middleware to add this package functionality
-expressApp.use(multer().single('file')) // here "file" is the file name we will receive inside req object while processing upload file requests
+expressApp.use(multer().single('file')); // here "file" is the file name we will receive inside req object while processing upload file requests
 
 // **********************************************************************************
 // site images/static-resources middleware (this will return site static files)
 expressApp.use(
 	'/images',
 	express.static(path.join(__dirname, 'public', 'images'))
-)
+);
 
 // **********************************************************************************
 // static files (images/videos/files) middleware (this will return uploaded static files)
 expressApp.use(
 	'/files',
 	express.static(path.join(__dirname, 'public', 'uploaded-files'))
-)
+);
 
 // **********************************************************************************
 // cors headers middleware, this will set any required request headers
 expressApp.use((req, res, next) => {
-	res.setHeader('Access-Control-Allow-Origin', '*')
-	res.setHeader('Access-Control-Allow-Methods', '*')
-	res.setHeader('Access-Control-Allow-Headers', '*')
+	res.setHeader('Access-Control-Allow-Origin', '*');
+	res.setHeader('Access-Control-Allow-Methods', '*');
+	res.setHeader('Access-Control-Allow-Headers', '*');
 
-	return next()
-})
+	return next();
+});
 
 // **********************************************************************************
 // Checking/Creating Default Roles | Middleware
-expressApp.use(roleMiddleware)
+expressApp.use(roleMiddleware);
 
 // **********************************************************************************
 // Checking/Creating Default Users | Middleware
-expressApp.use(userMiddleware)
+expressApp.use(userMiddleware);
 
 // **********************************************************************************
 // auth middlware
-expressApp.use(authMiddleware)
+expressApp.use(authMiddleware);
 
 // **********************************************************************************
 // **********************************************************************************
@@ -128,22 +128,22 @@ expressApp.use(authMiddleware)
 expressApp.use((err, req, res, next) => {
 	console.error(
 		`app.js === Global Error Handler Middlware(GEHM) == ${{ err, req }}`
-	)
-	let message = RESPONSE_TYPES.GEHM_DEFAULT_RESPONSE.message
-	let statusCode = RESPONSE_TYPES.GEHM_DEFAULT_RESPONSE.statusCode
-	let errors = RESPONSE_TYPES.GEHM_DEFAULT_RESPONSE.errors
+	);
+	let message = RESPONSE_TYPES.GEHM_DEFAULT_RESPONSE.message;
+	let statusCode = RESPONSE_TYPES.GEHM_DEFAULT_RESPONSE.statusCode;
+	let errors = RESPONSE_TYPES.GEHM_DEFAULT_RESPONSE.errors;
 	if (err.message) {
-		message = err.message
+		message = err.message;
 	}
 	if (err.statusCode) {
-		statusCode = err.statusCode
+		statusCode = err.statusCode;
 	}
 	if (err.errors) {
-		errors = err.errors
+		errors = err.errors;
 	}
-	const response = { message, statusCode, errors }
-	return res.status(statusCode).json(response)
-})
+	const response = { message, statusCode, errors };
+	return res.status(statusCode).json(response);
+});
 
 // **********************************************************************************
 // **********************************************************************************
@@ -151,14 +151,14 @@ expressApp.use((err, req, res, next) => {
 // **********************************************************************************
 // **********************************************************************************
 // Auth Routes Middleware
-expressApp.use('/api/v1', authRoutes)
+expressApp.use('/api/v1', authRoutes);
 // User Routes Middleware
-expressApp.use('/api/v1', userRoutes)
+expressApp.use('/api/v1', userRoutes);
 
 // test middleware to test if app working fine
 expressApp.get('/', (req, res, next) => {
-	return res.json({ data: '<h1>Server Up and Running :)</h1>' })
-})
+	return res.json({ data: '<h1>Server Up and Running :)</h1>' });
+});
 
 // **********************************************************************************
 // **********************************************************************************
@@ -167,15 +167,15 @@ expressApp.get('/', (req, res, next) => {
 // **********************************************************************************
 UserModel.belongsToMany(RoleModel, {
 	through: UserRoleModel,
-})
+});
 RoleModel.belongsToMany(UserModel, {
 	through: UserRoleModel,
-})
-UserModel.hasMany(UserProfileImageModel)
+});
+UserModel.hasMany(UserProfileImageModel);
 UserProfileImageModel.belongsTo(UserModel, {
 	constraints: true,
 	onDelete: 'CASCADE',
-})
+});
 
 // **********************************************************************************
 // **********************************************************************************
@@ -186,12 +186,12 @@ sequelize
 	// .sync({ force: true }) // don't uncomment in production, this will delete all tables and data from Database
 	.sync()
 	.then((_) => {
-		expressApp.listen(CONFIG.SERVER_PORT)
+		expressApp.listen(CONFIG.SERVER_PORT);
 		console.info(
 			'Roommate App Backend Server running on port http://localhost:' +
 				CONFIG.SERVER_PORT
-		)
+		);
 	})
 	.catch((err) => {
-		console.error(`app.js === sequelize.sync == error = `, { err })
-	})
+		console.error(`app.js === sequelize.sync == error = `, { err });
+	});
